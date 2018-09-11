@@ -18,7 +18,7 @@ coordT *pos;
 float *mass;
 int nvertex, nfacets;
 float *xv, *yv, *zv;		/*vertices */
-int *neigbors;			/*array ids of neighbors */
+long long int *neigbors;	/*array ids of neighbors */
 int *neignum;			/*number of neighbors each particles */
 int *neigind;			/*position in neighbors array where particle's neighbors begin */
 float *vol;
@@ -399,7 +399,7 @@ computeneig (void)
     ("Task=%d N.facets=%d N.vertices=%d N.pointfacets=%d Max_neighbors=%d\n",
      ThisTask, nfacets, nvertex, nadjpos, nmax);
 
-  neigbors = malloc (nsum * sizeof (int));
+  neigbors = malloc (nsum * sizeof (long long int));
 
 #ifdef COMPUTEGRAD
   neigborsg = malloc (nsum * sizeof (int));

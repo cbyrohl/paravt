@@ -254,7 +254,7 @@ selectborder (int direction)
   int ii, jj, kk, ii2, jj2, kk2;
   float offx, offy, offz;
   float *sendbuf, *recbuf;
-  int *sendind, *recind;
+  long long int *sendind, *recind;
   int bufrank;
   MPI_Request request, request2;
   MPI_Status status;
@@ -578,7 +578,7 @@ printf("New number of particles task %d: %d -- boundary expanded a factor of %.1
   if (Nsend > 0)
     {
       sendbuf = malloc (Nsend * sizeof (float) * bufrank);
-      sendind = malloc (Nsend * sizeof (int));
+      sendind = malloc (Nsend * sizeof (long long int));
       ii = 0;
       for (i = 0; i < NumThis; i++)
 	{
@@ -611,11 +611,11 @@ printf("New number of particles task %d: %d -- boundary expanded a factor of %.1
   if (Nsend > 0)
     MPI_Wait (&request2, &status);
   if (Nrec > 0)
-    recind = malloc (Nrec * sizeof (int));
+    recind = malloc (Nrec * sizeof (long long int));
   if (Nrec > 0)
-    MPI_Irecv (recind, Nrec, MPI_INT, TaskRec, 0, MPI_COMM_WORLD, &request);
+    MPI_Irecv (recind, Nrec, MPI_LONG_LONG, TaskRec, 0, MPI_COMM_WORLD, &request);
   if (Nsend > 0)
-    MPI_Isend (sendind, Nsend, MPI_INT, TaskSend, 0, MPI_COMM_WORLD,
+    MPI_Isend (sendind, Nsend, MPI_LONG_LONG, TaskSend, 0, MPI_COMM_WORLD,
 	       &request2);
   if (Nrec > 0)
     MPI_Wait (&request, &status);
@@ -628,7 +628,7 @@ printf("New number of particles task %d: %d -- boundary expanded a factor of %.1
       locbuffer =
 	realloc (locbuffer,
 		 (NumThis + NumThisb + Nrec) * sizeof (float) * bufrank);
-      locind = realloc (locind, (NumThis + NumThisb + Nrec) * sizeof (int));
+      locind = realloc (locind, (NumThis + NumThisb + Nrec) * sizeof (long long int));
       ii = NumThis + NumThisb;
       for (i = 0; i < Nrec; i++)
 	{

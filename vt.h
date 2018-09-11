@@ -9,7 +9,7 @@ extern float *xv, *yv, *zv;	/*vertices */
 extern vertexT *vertex;
 extern setT *vertices;
 extern facetT *facet;		/* set by FORALLfacets */
-extern int *neigbors;		/*array ids of neighbors */
+extern long long int *neigbors;		/*array ids of neighbors */
 extern int *neignum;		/*number of neighbors each particles */
 extern int *neigind;		/*position in neighbors array where particle's neighbors begin */
 extern float *vol;

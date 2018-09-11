@@ -13,7 +13,7 @@
 
 extern int ThisTask;		/*local task */
 extern int NTask;		/*total number of tasks */
-extern int NumPart;		/*number of particles */
+extern long long int NumPart;	/*number of particles */
 extern int NumThis;		/*number particles this */
 extern int NumThisb;		/*number boundary particles this */
 extern int fileformat;		/*input file format */
@@ -27,7 +27,7 @@ extern float bsize;		/*border size */
 
 extern int localindex;		/*part in this task in this buffer loop */
 extern int globalindex;		/*total particles allocated in this task */
-extern int globalcount;		/*read particles all tasks */
+extern long long int globalcount;/*read particles all tasks */
 extern int currsize;		/*read particles in current loop */
 extern int loopcount;		/*current loop number */
 extern int root;		/* root process (default 0) */
@@ -47,7 +47,7 @@ extern FILE *filegrad;          /*output gradient file*/
 extern float *buffer;		/*Read buffer */
 extern int *member;		/*save cell location for each particle */
 extern float *locbuffer;	/*buffer allocated each task */
-extern int *locind;		/*index part. for local buffer each task */
+extern long long int *locind;	/*index part. for local buffer each task */
 
 extern int stopit;
 

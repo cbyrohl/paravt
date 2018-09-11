@@ -69,7 +69,7 @@ read_header_boxascii (void)
 #endif
     }
   check_stop ();
-  MPI_Bcast (&NumPart, 1, MPI_INT, root, MPI_COMM_WORLD);
+  MPI_Bcast (&NumPart, 1, MPI_LONG_LONG, root, MPI_COMM_WORLD);
 #ifdef BOX
   MPI_Bcast (&lbox, 1, MPI_FLOAT, root, MPI_COMM_WORLD);
 #else
@@ -90,7 +90,7 @@ read_header_bin (void)
 	  stopcode ();
 	}
 #ifdef BOX
-      fread (&NumPart, sizeof (int), 1, filein);
+      fread (&NumPart, sizeof (long long int), 1, filein);
       fread (&lbox, sizeof (float), 1, filein);
       printf ("NumPart=%d  Lbox=%8.3f\n", NumPart, lbox);
       lboxx = 0;
@@ -102,7 +102,7 @@ read_header_bin (void)
 #endif
     }
   check_stop ();
-  MPI_Bcast (&NumPart, 1, MPI_INT, root, MPI_COMM_WORLD);
+  MPI_Bcast (&NumPart, 1, MPI_LONG_LONG, root, MPI_COMM_WORLD);
   MPI_Bcast (&lbox, 1, MPI_FLOAT, root, MPI_COMM_WORLD);
 
 }
@@ -175,7 +175,7 @@ read_header_gadget (void)
       fclose (filein);
     }
   check_stop ();
-  MPI_Bcast (&NumPart, 1, MPI_INT, root, MPI_COMM_WORLD);
+  MPI_Bcast (&NumPart, 1, MPI_LONG_LONG, root, MPI_COMM_WORLD);
   MPI_Bcast (&lbox, 1, MPI_FLOAT, root, MPI_COMM_WORLD);
 
 }
@@ -241,7 +241,7 @@ read_header_rockstar (void)
   lboxz = 0;
 
   check_stop ();
-  MPI_Bcast (&NumPart, 1, MPI_INT, root, MPI_COMM_WORLD);
+  MPI_Bcast (&NumPart, 1, MPI_LONG_LONG, root, MPI_COMM_WORLD);
   MPI_Bcast (&lbox, 1, MPI_FLOAT, root, MPI_COMM_WORLD);
 }
 
@@ -344,12 +344,12 @@ read_part_boxascii (void)
 	    }
 	  if (locind == NULL)
 	    {
-	      locind = malloc (localindex * sizeof (int));
+	      locind = malloc (localindex * sizeof (long long int));
 	    }
 	  else
 	    {
 	      locind =
-		realloc (locind, (globalindex + localindex) * sizeof (int));
+		realloc (locind, (globalindex + localindex) * sizeof (long long int));
 	    }
 	  count = 0;
 	  for (i = 0; i < currsize; i++)
@@ -487,12 +487,12 @@ read_part_rockstar (void)
 	    }
 	  if (locind == NULL)
 	    {
-	      locind = malloc (localindex * sizeof (int));
+	      locind = malloc (localindex * sizeof (long long int));
 	    }
 	  else
 	    {
 	      locind =
-		realloc (locind, (globalindex + localindex) * sizeof (int));
+		realloc (locind, (globalindex + localindex) * sizeof (long long int));
 	    }
 	  count = 0;
 	  for (i = 0; i < currsize; i++)
@@ -627,12 +627,12 @@ read_part_bin (void)
 	    }
 	  if (locind == NULL)
 	    {
-	      locind = malloc (localindex * sizeof (int));
+	      locind = malloc (localindex * sizeof (long long int));
 	    }
 	  else
 	    {
 	      locind =
-		realloc (locind, (globalindex + localindex) * sizeof (int));
+		realloc (locind, (globalindex + localindex) * sizeof (long long int));
 	    }
 	  count = 0;
 	  for (i = 0; i < currsize; i++)
@@ -807,13 +807,13 @@ read_part_gadget (void)
 		}
 	      if (locind == NULL)
 		{
-		  locind = malloc (localindex * sizeof (int));
+		  locind = malloc (localindex * sizeof (long long int));
 		}
 	      else
 		{
 		  locind =
 		    realloc (locind,
-			     (globalindex + localindex) * sizeof (int));
+			     (globalindex + localindex) * sizeof (long long int));
 		}
 	      count = 0;
 	      for (i = 0; i < currsize; i++)
@@ -858,10 +858,15 @@ read_part_gadget (void)
 void
 savedata (int dtype)
 {
-  int i, j, k, istart, iend, ii, irem, num, iloop, isize, nthis, nro, nro2;
+  int i, j, k, num, iloop, isize, nthis, nro, nro2;
+  long long istart, iend, irem, ii;
   float *sdata, *srec, *stemp;
-  int *stemp2, *stemp3, *stemp4, *srec2, *srec3, *srec4;
-  int *sidata, *sirec, *sitemp, *sdata2, *sdata3, *sdata4;
+  int *stemp2, *srec2, *sdata2; /*neighbor count per cell requires int only */
+  int *stemp4; /* contains local neighbor offsets, thus int is fine until converted to sdata4 */
+  long long int *stemp3, *srec3, *srec4;
+  long long int *sdata3, *sdata4;
+  long long int *sidata;
+  int *sirec, *sitemp; 
   int in1, in2, tag, nrosum, id, indt, nrosum2, ind;
   int nroot[NTask], nroot2[NTask];
   MPI_Request request, request2, request3, request4;
@@ -901,7 +906,7 @@ savedata (int dtype)
             sdata = malloc (nthis * sizeof (float));
 	  if (dtype == 2)
 	    sdata2 = malloc (nthis * sizeof (int));
-	  sidata = malloc (nthis * sizeof (int));
+	  sidata = malloc (nthis * sizeof (long long int));
 	  in1 = 0;
 	  for (i = 0; i < NumThis; i++)
 	    {
@@ -929,8 +934,8 @@ savedata (int dtype)
 	  if (dtype == 2)
 	    {
 	      in1 = 0;
-	      sdata3 = malloc (nn * sizeof (int));	/*neigbors */
-	      sdata4 = malloc (nthis * sizeof (int));	/*indices */
+	      sdata3 = malloc (nn * sizeof (long long int));	/*neigbors */
+	      sdata4 = malloc (nthis * sizeof (long long int));	/*indices */
 	      for (i = 0; i < NumThis; i++)
 		{
 		  if ((locind[i] >= istart) && (locind[i] < iend))
@@ -984,12 +989,12 @@ savedata (int dtype)
           if (dtype >= 3)
             srec = malloc (isize * sizeof (float));
 	  if (dtype == 2)
-	    srec2 = malloc (isize * sizeof (int));
+	    srec2 = malloc (isize * sizeof (int)); /*neighbor count*/
 	  sirec = malloc (isize * sizeof (int));
 	  if (dtype == 2)
-	    srec3 = malloc (nrosum2 * sizeof (int));	/*neigbors */
+	    srec3 = malloc (nrosum2 * sizeof (long long int));	/*neigbors */
 	  if (dtype == 2)
-	    srec4 = malloc (isize * sizeof (int));	/*neigind */
+	    srec4 = malloc (isize * sizeof (long long int));	/*neigind */
 	  if (dtype == 2)
 	    for (i = 0; i < isize; i++)
 	      srec4[i] = 0;
@@ -1005,7 +1010,7 @@ savedata (int dtype)
       if (nthis > 0)
 	{
 	  tag = ThisTask;
-	  MPI_Isend (sidata, nthis, MPI_INT, root, tag, MPI_COMM_WORLD,
+	  MPI_Isend (sidata, nthis, MPI_LONG_LONG, root, tag, MPI_COMM_WORLD,
 		     &request);
 	  if (dtype == 0)
 	    MPI_Isend (sdata, nthis, MPI_FLOAT, root, tag, MPI_COMM_WORLD,
@@ -1020,7 +1025,7 @@ savedata (int dtype)
 	    MPI_Isend (sdata2, nthis, MPI_INT, root, tag, MPI_COMM_WORLD,
 		       &request2);
 	  if (dtype == 2)
-	    MPI_Isend (sdata3, nn, MPI_INT, root, tag, MPI_COMM_WORLD,
+	    MPI_Isend (sdata3, nn, MPI_LONG_LONG, root, tag, MPI_COMM_WORLD,
 		       &request3);
 	  if (dtype == 2)
 	    MPI_Isend (sdata4, nthis, MPI_INT, root, tag, MPI_COMM_WORLD,
@@ -1046,12 +1051,12 @@ savedata (int dtype)
 		  if (dtype == 2)
 		    stemp2 = malloc (nro * sizeof (int));
 		  if (dtype == 2)
-		    stemp3 = malloc (nro2 * sizeof (int));
+		    stemp3 = malloc (nro2 * sizeof (long long int));
 		  if (dtype == 2)
 		    stemp4 = malloc (nro * sizeof (int));
-		  sitemp = malloc (nro * sizeof (int));
+		  sitemp = malloc (nro * sizeof (long long int));
 		  tag = i;
-		  MPI_Irecv (sitemp, nro, MPI_INT, i, tag, MPI_COMM_WORLD,
+		  MPI_Irecv (sitemp, nro, MPI_LONG_LONG, i, tag, MPI_COMM_WORLD,
 			     &request);
 		  if (dtype == 0)
 		    MPI_Irecv (stemp, nro, MPI_FLOAT, i, tag, MPI_COMM_WORLD,
@@ -1066,7 +1071,7 @@ savedata (int dtype)
 		    MPI_Irecv (stemp2, nro, MPI_INT, i, tag, MPI_COMM_WORLD,
 			       &request2);
 		  if (dtype == 2)
-		    MPI_Irecv (stemp3, nro2, MPI_INT, i, tag, MPI_COMM_WORLD,
+		    MPI_Irecv (stemp3, nro2, MPI_LONG_LONG, i, tag, MPI_COMM_WORLD,
 			       &request3);
 		  if (dtype == 2)
 		    MPI_Irecv (stemp4, nro, MPI_INT, i, tag, MPI_COMM_WORLD,
@@ -1147,7 +1152,7 @@ savedata (int dtype)
 		fprintf (fileden, "%10.4g\n", srec[i]);
 #else
 	      if (iloop == 0)
-		fwrite (&NumPart, sizeof (int), 1, fileden);
+		fwrite (&NumPart, sizeof (long long int), 1, fileden);
 	      if (fwrite (srec, sizeof (float), isize, fileden) != isize)
 		{
 		  printf ("Error writing density.\n");
@@ -1164,7 +1169,7 @@ savedata (int dtype)
 		fprintf (filevol, "%10.4g\n", srec[i]);
 #else
 	      if (iloop == 0)
-		fwrite (&NumPart, sizeof (int), 1, filevol);
+		fwrite (&NumPart, sizeof (long long int), 1, filevol);
 	      if (fwrite (srec, sizeof (float), isize, filevol) != isize)
 		{
 		  printf ("Error writing volume.\n");
@@ -1181,7 +1186,7 @@ savedata (int dtype)
                 fprintf (filegrad, "%10.4g\n", srec[i]);
 #else
               if (iloop == 0)
-                fwrite (&NumPart, sizeof (int), 1, filegrad);
+                fwrite (&NumPart, sizeof (long long int), 1, filegrad);
               if (fwrite (srec, sizeof (float), isize, filegrad) != isize)
                 {
                   printf ("Error writing gradient.\n");
@@ -1207,14 +1212,14 @@ savedata (int dtype)
 	      if (iloop == 0)
 		{
 		  /*printf ("nb2 array lenght=%d\n", nneigtotal); */
-		  fwrite (&NumPart, sizeof (int), 1, fileneig);
+		  fwrite (&NumPart, sizeof (long long int), 1, fileneig);
 		  fwrite (&nneigtotal, sizeof (int), 1, fileneig2);
 		}
 	      if (fwrite (srec2, sizeof (int), isize, fileneig) != isize)
 		printf ("Error writing nb.\n");
-	      if (fwrite (srec4, sizeof (int), isize, fileneig) != isize)
+	      if (fwrite (srec4, sizeof (long long int), isize, fileneig) != isize)
 		printf ("Error writing nb.\n");
-	      if (fwrite (srec3, sizeof (int), nrosum2, fileneig2) != nrosum2)
+	      if (fwrite (srec3, sizeof (long long int), nrosum2, fileneig2) != nrosum2)
 		printf ("Error writing nb2.\n");
 #endif
 	    }
@@ -1253,9 +1258,15 @@ savedata (int dtype)
       ii = ii + isize;
       istart = iend;
       irem = NumPart - ii;	/*remaining particles */
-      isize = irem;
       if (irem > BUFFERSIZE)
-	isize = BUFFERSIZE;
+        {
+	  isize = BUFFERSIZE;
+        }
+      else
+	{
+        /*being in if-else-statement guarantees that isize okay with 32-bit integer */
+      	  isize = irem; 
+	}
       iend = istart + isize;
       iloop++;
       if (ThisTask == root)

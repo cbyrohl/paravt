@@ -9,7 +9,7 @@
 
 #Default
 CC     = mpicc
-CCOPTS1 = -O2 -fpic
+CCOPTS1 = -O2 -fpic -Wconversion -Wno-sign-conversion
 
 #######################################################################
 # If MPI is located in a non default directory
