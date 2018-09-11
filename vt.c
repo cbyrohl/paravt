@@ -541,6 +541,8 @@ computedens (void)
       if (mass[i] < minmass)
 	minmass = mass[i];
 #else
+      minmass = 1.0;
+      maxmass = 1.0;
       rho[i] = 1.0 / vol[i];
 #endif
       if (rho[i] > maxrho)
